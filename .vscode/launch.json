@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Servidor Python (FastAPI)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "main:app",
+        "--reload",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "App Flutter",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🚀 SISTEMA COMPLETO",
+      "configurations": [
+        "Servidor Python (FastAPI)",
+        "App Flutter"
+      ]
+    }
+  ]
+}
