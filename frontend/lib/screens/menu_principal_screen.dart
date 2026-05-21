@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
-
-// Importación de formularios con los nombres de clase corregidos
-import '../forms/prestamo_libro_form.dart';
-import '../forms/registro_libro_form.dart';
-import '../forms/devolucion_libro_form.dart';
-import '../forms/importar_libros_form.dart';
-import '../forms/buscar_libro_form.dart';
-import '../forms/buscar_solicitante_form.dart';
-import '../forms/reporte_libros_form.dart';
-import '../forms/estadisticas_generales_form.dart';
-import '../forms/inventario_libros_form.dart';
+import '../main.dart'; // Para acceder al themeNotifier
+import 'inventario_screen.dart';
+import 'movimientos_screen.dart';
 
 class PantallaMenuPrincipal extends StatefulWidget {
   const PantallaMenuPrincipal({super.key});
@@ -20,54 +11,175 @@ class PantallaMenuPrincipal extends StatefulWidget {
 }
 
 class _PantallaMenuPrincipalState extends State<PantallaMenuPrincipal> {
-  String _seccionActual = "Principal";
-  final Color azulUSM = const Color(0xFF2B27A1);
+  String _seccionActual = "Dashboard";
 
-  /// Método que renderiza el formulario seleccionado en el Sidebar
   Widget _construirVistaContenido() {
     switch (_seccionActual) {
-      case "Registrar Préstamo":
-        return const PrestamoLibroForm(); // Clase en prestamo_libro_form.dart
-      case "Registrar libro":
-        return const RegistroLibroForm();
-      case "Registrar Devolución":
-        return const DevolucionLibroForm(); // Clase en devolucion_libro_form.dart
-      case "Importar libros":
-        return const ImportarLibrosForm();
-      case "Buscar libro":
-        return const BuscarLibroForm();
-      case "Buscar solicitante":
-        return const BuscarSolicitanteForm();
       case "Inventario":
-        return const InventarioLibrosForm();
-      case "Reporte de libros":
-        return const ReporteLibrosForm();
-      case "Estadísticas generales":
-        return const EstadisticasGeneralesForm();
+        return const InventarioScreen();
+      case "Movimientos":
+        return const MovimientosScreen();
       default:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        return _construirPantallaBienvenida();
+    }
+  }
+
+  Widget _construirPantallaBienvenida() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Icon(Icons.account_balance, size: 100, color: Colors.grey[300]),
-              const SizedBox(height: 15),
-              Text(
-                "Bienvenido al Sistema USM",
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(Icons.local_hospital, size: 48, color: colorScheme.onPrimaryContainer),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Inventario Odontología",
+                      style: TextStyle(
+                        fontSize: 32,
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Gestión local de insumos médicos y control de stock.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Text("Seleccione una opción en el menú lateral"),
             ],
           ),
-        );
-    }
+          const SizedBox(height: 48),
+          Text(
+            "Módulos Principales",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              int crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
+              return GridView.count(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: 1.2,
+                children: [
+                  _crearTarjetaModulo(
+                    titulo: "Inventario",
+                    descripcion: "Consulta, registra y edita el catálogo de insumos médicos disponibles.",
+                    icono: Icons.inventory,
+                    color: Colors.teal,
+                    onTap: () => setState(() => _seccionActual = "Inventario"),
+                  ),
+                  _crearTarjetaModulo(
+                    titulo: "Movimientos",
+                    descripcion: "Registra entradas y salidas de stock para mantener el inventario actualizado.",
+                    icono: Icons.swap_horiz,
+                    color: Colors.blueAccent,
+                    onTap: () => setState(() => _seccionActual = "Movimientos"),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _crearTarjetaModulo({
+    required String titulo,
+    required String descripcion,
+    required IconData icono,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: theme.dividerColor.withOpacity(0.2)),
+        ),
+        color: theme.brightness == Brightness.dark 
+            ? colorScheme.surfaceContainerHighest.withOpacity(0.3) 
+            : Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icono, size: 32, color: color),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                titulo,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                descripcion,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       body: Row(
         children: [
@@ -75,9 +187,9 @@ class _PantallaMenuPrincipalState extends State<PantallaMenuPrincipal> {
           Container(
             width: 260,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
               border: Border(
-                right: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+                right: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
               ),
             ),
             child: Column(
@@ -87,51 +199,13 @@ class _PantallaMenuPrincipalState extends State<PantallaMenuPrincipal> {
                     child: Column(
                       children: [
                         _crearCabeceraSidebar(),
-                        _itemMenu(Icons.dashboard, "Principal"),
-
-                        // Grupo Actas
-                        _grupoMenu(Icons.swap_horiz, "Actas", [
-                          "Registrar Préstamo",
-                          "Registrar Devolución",
-                          "Registrar libro",
-                          "Importar libros",
-                        ]),
-
-                        // Grupo Consultas
-                        _grupoMenu(Icons.search, "Consultas", [
-                          "Buscar libro",
-                          "Buscar solicitante",
-                          "Inventario",
-                        ]),
-
-                        // Grupo Estadísticas
-                        _grupoMenu(Icons.pie_chart, "Estadísticas", [
-                          "Reporte de libros",
-                          "Estadísticas generales",
-                        ]),
+                        _itemMenu(Icons.dashboard, "Dashboard"),
+                        _itemMenu(Icons.inventory, "Inventario"),
+                        _itemMenu(Icons.swap_horiz, "Movimientos"),
                       ],
                     ),
                   ),
                 ),
-                // Botón Cerrar Sesión
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    "Cerrar Sesión",
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onTap: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PantallaLogin(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -145,15 +219,15 @@ class _PantallaMenuPrincipalState extends State<PantallaMenuPrincipal> {
                     _seccionActual,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                  backgroundColor: theme.scaffoldBackgroundColor,
+                  foregroundColor: colorScheme.onSurface,
                   elevation: 0,
                   centerTitle: false,
                 ),
                 const Divider(height: 1),
                 Expanded(
                   child: Container(
-                    color: Colors.white,
+                    color: theme.scaffoldBackgroundColor,
                     child: _construirVistaContenido(),
                   ),
                 ),
@@ -165,68 +239,90 @@ class _PantallaMenuPrincipalState extends State<PantallaMenuPrincipal> {
     );
   }
 
-  // --- WIDGETS AUXILIARES PARA EL SIDEBAR ---
-
   Widget _crearCabeceraSidebar() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
       child: Column(
         children: [
           CircleAvatar(
             radius: 35,
-            backgroundColor: azulUSM,
-            child: const Icon(Icons.person, color: Colors.white, size: 40),
+            backgroundColor: colorScheme.primary,
+            child: const Icon(Icons.medical_services, color: Colors.white, size: 40),
           ),
           const SizedBox(height: 15),
           const Text(
-            "Administrador USM",
+            "ODONTOLOGÍA",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           Text(
-            "Biblioteca Central",
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            "Inventario Local",
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
+          ),
+          const SizedBox(height: 20),
+          
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: themeNotifier,
+            builder: (context, currentMode, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.all(4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _botonTema(Icons.light_mode, ThemeMode.light, currentMode),
+                    _botonTema(Icons.dark_mode, ThemeMode.dark, currentMode),
+                    _botonTema(Icons.settings_brightness, ThemeMode.system, currentMode),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
 
+  Widget _botonTema(IconData icono, ThemeMode modo, ThemeMode activo) {
+    bool esActivo = modo == activo;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: () => themeNotifier.value = modo,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: esActivo ? colorScheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Icon(
+          icono,
+          size: 18,
+          color: esActivo ? Colors.white : colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
   Widget _itemMenu(IconData icono, String titulo) {
     bool seleccionado = _seccionActual == titulo;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListTile(
-      leading: Icon(icono, color: seleccionado ? azulUSM : Colors.grey),
+      leading: Icon(icono, color: seleccionado ? colorScheme.primary : colorScheme.onSurfaceVariant),
       title: Text(
         titulo,
         style: TextStyle(
-          color: seleccionado ? azulUSM : Colors.black,
+          color: seleccionado ? colorScheme.primary : colorScheme.onSurface,
           fontWeight: seleccionado ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       selected: seleccionado,
       onTap: () => setState(() => _seccionActual = titulo),
-    );
-  }
-
-  Widget _grupoMenu(IconData icono, String titulo, List<String> subItems) {
-    return ExpansionTile(
-      leading: Icon(icono),
-      title: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w500)),
-      children: subItems
-          .map(
-            (item) => ListTile(
-              contentPadding: const EdgeInsets.only(left: 60),
-              title: Text(
-                item,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _seccionActual == item ? azulUSM : Colors.black87,
-                ),
-              ),
-              onTap: () => setState(() => _seccionActual = item),
-              selected: _seccionActual == item,
-            ),
-          )
-          .toList(),
     );
   }
 }
